@@ -225,8 +225,43 @@ void displayResults(const vector<Process>& processes, const string& algorithmNam
     cout << "Average Waiting Time: " << fixed << setprecision(2) << avgWaiting << endl;
 }
 
+// Function to execute the selected scheduling algorithm
+void executeScheduler(vector<Process>& processes, int choice) {
+    vector<Process> tempProcesses = processes;
+
+    switch (choice) {
+        case 1:
+            // Execute FCFS algorithm
+            Scheduler::FCFS(tempProcesses);
+            displayResults(tempProcesses, "FCFS");
+            break;
+        case 2:
+            // Execute SJF algorithm
+            Scheduler::SJF(tempProcesses);
+            displayResults(tempProcesses, "SJF");
+            break;
+        case 3: {
+            // Execute Round Robin with user-defined time quantum
+            int quantum;
+            cout << "Enter time quantum for Round Robin: ";
+            cin >> quantum;
+            Scheduler::RoundRobin(tempProcesses, quantum);
+            displayResults(tempProcesses, "Round Robin (Quantum = " + to_string(quantum) + ")");
+            break;
+        }
+        case 4:
+            // Execute Priority Scheduling algorithm
+            Scheduler::PriorityScheduling(tempProcesses);
+            displayResults(tempProcesses, "Priority Scheduling");
+            break;
+        default:
+            cout << "Invalid choice! Please try again." << endl;
+    }
+}
+
 int main() {
     // PID - Arrival Time - Burst Time - Priority
+    // Change these values to test different scenarios
     vector<Process> processes = {
         Process(1, 0, 8, 1),
         Process(2, 1, 4, 2),
@@ -256,32 +291,8 @@ int main() {
 
         if (choice == 5) break;
 
-        vector<Process> tempProcesses = processes;
-
-        switch (choice) {
-            case 1:
-                Scheduler::FCFS(tempProcesses);
-                displayResults(tempProcesses, "FCFS");
-                break;
-            case 2:
-                Scheduler::SJF(tempProcesses);
-                displayResults(tempProcesses, "SJF");
-                break;
-            case 3: {
-                int quantum;
-                cout << "Enter time quantum for Round Robin: ";
-                cin >> quantum;
-                Scheduler::RoundRobin(tempProcesses, quantum);
-                displayResults(tempProcesses, "Round Robin (Quantum = " + to_string(quantum) + ")");
-                break;
-            }
-            case 4:
-                Scheduler::PriorityScheduling(tempProcesses);
-                displayResults(tempProcesses, "Priority Scheduling");
-                break;
-            default:
-                cout << "Invalid choice! Please try again." << endl;
-        }
+        // Call the executeScheduler function with user choice
+        executeScheduler(processes, choice);
     }
 
     cout << "\nThank you for using CPU Scheduler!" << endl;
