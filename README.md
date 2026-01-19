@@ -81,9 +81,15 @@ g++-13 -o "Multi-Algorithm CPU Scheduler" "Multi-Algorithm CPU Scheduler.cpp"
 ## Requirements Met
 
 ✓ Object-oriented design with Process class
+
 ✓ Multiple scheduling algorithms
+
 ✓ Correct calculation of scheduling metrics
+
 ✓ Interactive menu system
+
 ✓ Formatted output display
+
 ✓ Proper memory management
+
 ✓ User input validation capabilities
