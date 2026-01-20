@@ -4,8 +4,16 @@
 #include <algorithm>
 #include <iomanip>
 #include <climits>
+#include <string>
 
 using namespace std;
+
+// Structure to track execution segments for Gantt chart
+struct ExecutionSegment {
+    int processID;
+    int startTime;
+    int endTime;
+};
 
 class Process {
     private:
@@ -65,7 +73,9 @@ class Process {
 class Scheduler {
 public:
     // FCFS - First Come First Served
-    static void FCFS(vector<Process>& processes) {
+    static vector<ExecutionSegment> FCFS(vector<Process>& processes) {
+        vector<ExecutionSegment> execution;
+        
         sort(processes.begin(), processes.end(),
              [](const Process& a, const Process& b) {
                  return a.getArrivalTime() < b.getArrivalTime();
@@ -76,16 +86,21 @@ public:
             if (currentTime < p.getArrivalTime()) {
                 currentTime = p.getArrivalTime();
             }
+            int startTime = currentTime;
             currentTime += p.getBurstTime();
             p.setCompletionTime(currentTime);
             p.calculateTurnaroundTime();
             p.calculateWaitingTime();
+            
+            execution.push_back({p.getPID(), startTime, currentTime});
         }
+        
+        return execution;
     }
 
     // SJF - Shortest Job First (Non-preemptive)
-    static void SJF(vector<Process>& processes) {
-        vector<Process> result;
+    static vector<ExecutionSegment> SJF(vector<Process>& processes) {
+        vector<ExecutionSegment> execution;
         vector<bool> processed(processes.size(), false);
         int currentTime = 0;
         int completed = 0;
@@ -113,16 +128,22 @@ public:
             }
 
             processed[shortest] = true;
+            int startTime = currentTime;
             currentTime += processes[shortest].getBurstTime();
             processes[shortest].setCompletionTime(currentTime);
             processes[shortest].calculateTurnaroundTime();
             processes[shortest].calculateWaitingTime();
+            
+            execution.push_back({processes[shortest].getPID(), startTime, currentTime});
             completed++;
         }
+        
+        return execution;
     }
 
     // Round Robin
-    static void RoundRobin(vector<Process>& processes, int timeQuantum) {
+    static vector<ExecutionSegment> RoundRobin(vector<Process>& processes, int timeQuantum) {
+        vector<ExecutionSegment> execution;
         queue<int> q;
         vector<int> remainingTime(processes.size());
         
@@ -144,9 +165,11 @@ public:
             int idx = q.front();
             q.pop();
 
+            int startTime = currentTime;
             if (remainingTime[idx] > timeQuantum) {
                 currentTime += timeQuantum;
                 remainingTime[idx] -= timeQuantum;
+                execution.push_back({processes[idx].getPID(), startTime, currentTime});
                 q.push(idx);
             } else {
                 currentTime += remainingTime[idx];
@@ -154,12 +177,16 @@ public:
                 processes[idx].setCompletionTime(currentTime);
                 processes[idx].calculateTurnaroundTime();
                 processes[idx].calculateWaitingTime();
+                execution.push_back({processes[idx].getPID(), startTime, currentTime});
             }
         }
+        
+        return execution;
     }
 
     // Priority Scheduling (Non-preemptive) - Lower priority number = higher priority
-    static void PriorityScheduling(vector<Process>& processes) {
+    static vector<ExecutionSegment> PriorityScheduling(vector<Process>& processes) {
+        vector<ExecutionSegment> execution;
         vector<bool> processed(processes.size(), false);
         int currentTime = 0;
         int completed = 0;
@@ -187,12 +214,17 @@ public:
             }
 
             processed[highest] = true;
+            int startTime = currentTime;
             currentTime += processes[highest].getBurstTime();
             processes[highest].setCompletionTime(currentTime);
             processes[highest].calculateTurnaroundTime();
             processes[highest].calculateWaitingTime();
+            
+            execution.push_back({processes[highest].getPID(), startTime, currentTime});
             completed++;
         }
+        
+        return execution;
     }
 };
 
@@ -225,35 +257,119 @@ void displayResults(const vector<Process>& processes, const string& algorithmNam
     cout << "Average Waiting Time: " << fixed << setprecision(2) << avgWaiting << endl;
 }
 
+// Function to display Gantt Chart
+void displayGanttChart(const vector<ExecutionSegment>& execution) {
+    if (execution.empty()) return;
+    
+    cout << "\n" << string(80, '=') << endl;
+    cout << "GANTT CHART VISUALIZATION" << endl;
+    cout << string(80, '=') << endl;
+    
+    // Find the maximum time for scaling
+    int maxTime = 0;
+    for (const auto& seg : execution) {
+        maxTime = max(maxTime, seg.endTime);
+    }
+    
+    // Draw the timeline
+    cout << "\nTimeline:" << endl;
+    cout << "Time: ";
+    for (int i = 0; i <= maxTime; i += 2) {
+        cout << setw(3) << i;
+    }
+    cout << endl;
+    
+    // Draw Gantt chart bars
+    cout << "      ";
+    for (int i = 0; i < maxTime; i++) {
+        cout << "-";
+    }
+    cout << endl;
+    
+    // Display each process segment
+    for (const auto& seg : execution) {
+        cout << "P" << seg.processID << "   |";
+        
+        // Print spaces before the process
+        for (int i = 0; i < seg.startTime; i++) {
+            cout << " ";
+        }
+        
+        // Print the process block
+        int duration = seg.endTime - seg.startTime;
+        for (int i = 0; i < duration; i++) {
+            cout << "=";
+        }
+        
+        // Print process duration label
+        cout << "(" << duration << ")";
+        cout << endl;
+    }
+    
+    cout << "      ";
+    for (int i = 0; i < maxTime; i++) {
+        cout << "-";
+    }
+    cout << endl;
+    
+    // Display time markers
+    cout << "      ";
+    for (int i = 0; i <= maxTime; i++) {
+        if (i % 2 == 0) cout << i;
+        else cout << " ";
+    }
+    cout << endl;
+    
+    // Display process details
+    cout << "\nProcess Execution Details:" << endl;
+    cout << left << setw(10) << "Process" << setw(12) << "Start Time" << setw(12) << "End Time" << setw(12) << "Duration" << endl;
+    cout << string(46, '-') << endl;
+    
+    for (const auto& seg : execution) {
+        cout << left << setw(10) << "P" + to_string(seg.processID)
+             << setw(12) << seg.startTime
+             << setw(12) << seg.endTime
+             << setw(12) << (seg.endTime - seg.startTime) << endl;
+    }
+}
+
 // Function to execute the selected scheduling algorithm
 void executeScheduler(vector<Process>& processes, int choice) {
     vector<Process> tempProcesses = processes;
+    vector<ExecutionSegment> execution;
 
     switch (choice) {
-        case 1:
+        case 1: {
             // Execute FCFS algorithm
-            Scheduler::FCFS(tempProcesses);
+            execution = Scheduler::FCFS(tempProcesses);
             displayResults(tempProcesses, "FCFS");
+            displayGanttChart(execution);
             break;
-        case 2:
+        }
+        case 2: {
             // Execute SJF algorithm
-            Scheduler::SJF(tempProcesses);
+            execution = Scheduler::SJF(tempProcesses);
             displayResults(tempProcesses, "SJF");
+            displayGanttChart(execution);
             break;
+        }
         case 3: {
             // Execute Round Robin with user-defined time quantum
             int quantum;
             cout << "Enter time quantum for Round Robin: ";
             cin >> quantum;
-            Scheduler::RoundRobin(tempProcesses, quantum);
+            execution = Scheduler::RoundRobin(tempProcesses, quantum);
             displayResults(tempProcesses, "Round Robin (Quantum = " + to_string(quantum) + ")");
+            displayGanttChart(execution);
             break;
         }
-        case 4:
+        case 4: {
             // Execute Priority Scheduling algorithm
-            Scheduler::PriorityScheduling(tempProcesses);
+            execution = Scheduler::PriorityScheduling(tempProcesses);
             displayResults(tempProcesses, "Priority Scheduling");
+            displayGanttChart(execution);
             break;
+        }
         default:
             cout << "Invalid choice! Please try again." << endl;
     }
