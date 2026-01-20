@@ -113,6 +113,36 @@ g++-13 -o "Multi-Algorithm CPU Scheduler" "Multi-Algorithm CPU Scheduler.cpp"
 ./"Multi-Algorithm CPU Scheduler"
 ```
 
+## References
+
+### Textbooks & Academic Sources
+- **Operating System Concepts** (10th Edition) by Abraham Silberschatz, Peter B. Galvin, and Greg Gagne
+  - ISBN: 978-1118063330
+  - Comprehensive coverage of CPU scheduling algorithms and their implementations
+
+### Online Resources & Documentation
+- **GeeksforGeeks - CPU Scheduling**
+  - https://www.geeksforgeeks.org/cpu-scheduling-in-operating-systems/
+  - In-depth articles on FCFS, SJF, Round Robin, and Priority Scheduling
+
+- **TutorialsPoint - CPU Scheduling Algorithms**
+  - https://www.tutorialspoint.com/operating_system/os_cpu_scheduling.htm
+  - Detailed explanations and comparisons of scheduling algorithms
+
+### GitHub References
+- **CPU Scheduler Implementations**
+  - https://github.com/search?q=cpu+scheduler+algorithm+c%2B%2B
+  - Community implementations and variations of scheduling algorithms
+
+- **Operating System Simulators**
+  - https://github.com/topics/os-simulator
+  - Various OS simulation projects including scheduling visualizations
+
+### Related Concepts
+- Process Management and Scheduling in Linux Kernel Documentation
+- CPU Scheduling in Windows Operating System
+- Real-time Scheduling Algorithms (Rate Monotonic, Earliest Deadline First)
+
 ## Requirements Met
 
 ✓ Object-oriented design with Process class
